@@ -7,7 +7,7 @@ export class Favorites {
   }
 
   load() {
-    this.user = [
+    this.entries = [
       {
         login: "",
         name: "",
@@ -17,9 +17,9 @@ export class Favorites {
     ];
   }
 
-  delete(user) {
-    const filteredUsers = this.user.filter((entry) => {
-      
+  delete(entries) {
+    const filteredUsers = this.entries.filter((entry) => {
+      entry.login !== user.login;
     });
   }
 }
@@ -36,22 +36,22 @@ export class FavoritesView extends Favorites {
   update() {
     this.removeAllTr();
 
-    this.user.forEach((user) => {
+    this.entries.forEach((entries) => {
       const row = this.createRow();
 
       row.querySelector(
         ".user img"
-      ).src = `https://github.com/${user.login}.png`;
-      row.querySelector(".user img").alt = `imagem de ${user.name}`;
-      row.querySelector(".user p").textContent = user.name;
-      row.querySelector(".user span").textContent = user.login;
-      row.querySelector(".repositories").textContent = user.public_repos;
-      row.querySelector(".followers").textContent = user.followers;
+      ).src = `https://github.com/${entries.login}.png`;
+      row.querySelector(".user img").alt = `imagem de ${entries.name}`;
+      row.querySelector(".user p").textContent = entries.name;
+      row.querySelector(".user span").textContent = entries.login;
+      row.querySelector(".repositories").textContent = entries.public_repos;
+      row.querySelector(".followers").textContent = entries.followers;
 
       row.querySelector(".remove").onclick = () => {
         const isOK = confirm("Tem certeza que deseja deletar essa linha?");
         if (isOK) {
-          this.delete(user);
+          this.delete(entries);
         }
       };
 
