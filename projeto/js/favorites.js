@@ -1,16 +1,4 @@
-export class GithubUser {
-  static search(userName) {
-    const endpoint = `https://api.github.com/users/${userName}`;
-
-    return fetch(endpoint)
-      .then((data) => data.json())
-      .then((data) => {
-        const { login, name, public_repos, followers } = data;
-
-        return { login, name, public_repos, followers };
-      });
-  }
-}
+import { GithubUser } from "./githubuser.js";
 
 //classe que vai conter a lógica dos dados
 //como os dados serão estruturados
@@ -24,6 +12,34 @@ export class Favorites {
     this.entries = JSON.parse(localStorage.getItem("@github-favorites:")) || [];
   }
 
+  save() {
+    localStorage.setItem(`@github-favorites:`, JSON.stringify(this.entries));
+  }
+
+  async add(userName) {
+    try {
+      const user = await GithubUser.search(userName);
+
+      if (user.login == undefined) {
+        const userExist = this.entries.find(
+          (entry) => entry.login === userName
+        );
+
+        if (userExist) {
+          throw new Error("Usuário já cadastrado");
+        }
+
+        throw new Error("Usuário não encontrado");
+      }
+
+      this.entries = [user, ...this.entries];
+      this.update();
+      this.save();
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
   delete(user) {
     const filteredEntries = this.entries.filter((entry) => {
       entry.login !== user.login;
@@ -31,6 +47,7 @@ export class Favorites {
 
     this.entries = filteredEntries;
     this.update();
+    this.save();
   }
 }
 
@@ -42,10 +59,6 @@ export class FavoritesView extends Favorites {
     this.tbody = this.root.querySelector("table tbody");
     this.update();
     this.onadd();
-  }
-
-  async add(userName) {
-    const user = await GithubUser.search(userName);
   }
 
   onadd() {
@@ -68,6 +81,7 @@ export class FavoritesView extends Favorites {
       ).src = `https://github.com/${entries.login}.png`;
       row.querySelector(".user img").alt = `imagem de ${entries.name}`;
       row.querySelector(".user p").textContent = entries.name;
+      row.querySelector(".user a").href = `https://github.com/${user.login}`;
       row.querySelector(".user span").textContent = entries.login;
       row.querySelector(".repositories").textContent = entries.public_repos;
       row.querySelector(".followers").textContent = entries.followers;
