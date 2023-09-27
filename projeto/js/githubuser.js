@@ -4,10 +4,11 @@ export class GithubUser {
 
     return fetch(endpoint)
       .then((data) => data.json())
-      .then((data) => {
-        const { login, name, public_repos, followers } = data;
-
-        return { login, name, public_repos, followers };
-      });
+      .then(({ login, name, public_repos, followers }) => ({
+        login,
+        name,
+        public_repos,
+        followers,
+      }));
   }
 }

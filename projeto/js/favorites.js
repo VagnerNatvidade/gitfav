@@ -1,7 +1,8 @@
 import { GithubUser } from "./githubuser.js";
 
-//classe que vai conter a lógica dos dados
-//como os dados serão estruturados
+// classe que vai conter a lógica dos dados
+// como os dados serão estruturados
+
 export class Favorites {
   constructor(root) {
     this.root = document.querySelector(root);
@@ -13,23 +14,21 @@ export class Favorites {
   }
 
   save() {
-    localStorage.setItem(`@github-favorites:`, JSON.stringify(this.entries));
+    localStorage.setItem("@github-favorites:", JSON.stringify(this.entries));
   }
 
-  async add(userName) {
+  async add(username) {
     try {
-      const user = await GithubUser.search(userName);
+      const userExists = this.entries.find((entry) => entry.login === username);
 
-      if (user.login == undefined) {
-        const userExist = this.entries.find(
-          (entry) => entry.login === userName
-        );
+      if (userExists) {
+        throw new Error("Usuário já cadastrado");
+      }
 
-        if (userExist) {
-          throw new Error("Usuário já cadastrado");
-        }
+      const user = await GithubUser.search(username);
 
-        throw new Error("Usuário não encontrado");
+      if (user.login === undefined) {
+        throw new Error("Usuário não encontrado!");
       }
 
       this.entries = [user, ...this.entries];
@@ -41,9 +40,9 @@ export class Favorites {
   }
 
   delete(user) {
-    const filteredEntries = this.entries.filter((entry) => {
-      entry.login !== user.login;
-    });
+    const filteredEntries = this.entries.filter(
+      (entry) => entry.login !== user.login
+    );
 
     this.entries = filteredEntries;
     this.update();
@@ -51,12 +50,14 @@ export class Favorites {
   }
 }
 
-//classe que vai criar a vizualização e eventos do HTML
+// classe que vai criar a visualização e eventos do HTML
+
 export class FavoritesView extends Favorites {
-  //ligação e extensão da Favorites
   constructor(root) {
-    super(root); //link entre os construtores
+    super(root);
+
     this.tbody = this.root.querySelector("table tbody");
+
     this.update();
     this.onadd();
   }
@@ -73,23 +74,24 @@ export class FavoritesView extends Favorites {
   update() {
     this.removeAllTr();
 
-    this.entries.forEach((entries) => {
+    this.entries.forEach((user) => {
       const row = this.createRow();
 
       row.querySelector(
         ".user img"
-      ).src = `https://github.com/${entries.login}.png`;
-      row.querySelector(".user img").alt = `imagem de ${entries.name}`;
-      row.querySelector(".user p").textContent = entries.name;
+      ).src = `https://github.com/${user.login}.png`;
+      row.querySelector(".user img").alt = `Imagem de ${user.name}`;
       row.querySelector(".user a").href = `https://github.com/${user.login}`;
-      row.querySelector(".user span").textContent = entries.login;
-      row.querySelector(".repositories").textContent = entries.public_repos;
-      row.querySelector(".followers").textContent = entries.followers;
+      row.querySelector(".user p").textContent = user.name;
+      row.querySelector(".user span").textContent = user.login;
+      row.querySelector(".repositories").textContent = user.public_repos;
+      row.querySelector(".followers").textContent = user.followers;
 
       row.querySelector(".remove").onclick = () => {
-        const isOK = confirm("Tem certeza que deseja deletar essa linha?");
-        if (isOK) {
-          this.delete(entries);
+        const isOk = confirm("Tem certeza que deseja deletar essa linha?");
+
+        if (isOk) {
+          this.delete(user);
         }
       };
 
@@ -99,24 +101,24 @@ export class FavoritesView extends Favorites {
 
   createRow() {
     const tr = document.createElement("tr");
-
-    const data = `
-      <td class="user">
-        <img
-          src="https://github.com/VagnerNatvidade.png"
-          alt="imagem de VagnerNatvidade"
-        />
-        <a href="https://github.com/VagnerNatvidade"
-          ><p>Vagner Natividade</p>
-          <span>VagnerNatividade</span></a
-        >
-      </td>
-      <td class="repositories">12</td>
-      <td class="followers">9898</td>
-      <td><button class="remove">&times;</button></td>
-      `;
-
-    tr.innerHTML = data;
+    tr.innerHTML = `
+        <td class="user">
+           <img src="https://github.com/maykbrito.png" alt="Imagem de maykbrito">
+           <a href="https://github.com/maykbrito" target="_blank">
+             <p>Mayk Brito</p>
+             <span>maykbrito</span>
+           </a>
+         </td>
+         <td class="repositories">
+           76
+         </td>
+         <td class="followers">
+           9589
+         </td>
+         <td>
+           <button class="remove">&times;</button>
+         </td>
+        `;
 
     return tr;
   }
